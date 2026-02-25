@@ -1,0 +1,6 @@
+bibata-cursor-theme
+mpv-uosc-git
+tofi
+wlogout
+yay
+zen-browser-bin
