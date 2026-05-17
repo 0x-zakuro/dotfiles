@@ -45,15 +45,15 @@ exit
 ping -c 3 archlinux.org          # verify connectivity
 ```
 
-#### 1.3  SSH  *(recommended — copy-paste every command from your phone)*
+#### 1.3  SSH *(recommended)*
 
 ```bash
-passwd root                      # set a temporary password for the live session
+passwd root                      # set temporary root password
 systemctl enable --now sshd
-ip a                             # note the IP address shown
+ip a                             # note the IP address
 ```
 
-Then on your phone (use **Termius** or any SSH client) or another machine:
+Connect from another machine:
 
 ```bash
 ssh root@<ip address>
@@ -75,7 +75,7 @@ cfdisk /dev/<drive>
 | 3  | Root  | sda3   | Remainder   | Linux filesystem |
 
 ```bash
-lsblk                            # confirm layout before continuing
+lsblk                            # confirm layout
 ```
 
 ---
@@ -83,7 +83,7 @@ lsblk                            # confirm layout before continuing
 ### 3 · Format Partitions
 
 ```bash
-# EFI — skip entirely if reusing an existing Windows EFI partition
+# EFI — skip if reusing an existing Windows EFI partition
 mkfs.fat -F32 /dev/sda1
 
 # Swap
@@ -99,7 +99,7 @@ mkfs.btrfs /dev/sda3
 ### 4 · Create Btrfs Subvolumes & Mount
 
 `@` = OS root · `@home` = user data.
-Timeshift rolls back `@` without ever touching `@home`.
+Timeshift snapshots `@` independently — `@home` is never touched on rollback.
 
 ```bash
 mount /dev/sda3 /mnt
@@ -112,10 +112,10 @@ umount /mnt
 
 **Mount options**
 
-| Option          | Effect                                              |
-|-----------------|-----------------------------------------------------|
-| `compress=zstd`   | Transparent compression — saves ~20–40 % disk space |
-| `noatime`         | Skips read-time writes — reduces SSD wear           |
+| Option        | Effect                                              |
+|---------------|-----------------------------------------------------|
+| `compress=zstd` | Transparent compression — saves ~20–40 % disk space |
+| `noatime`       | Skips read-time writes — reduces SSD wear           |
 
 ```bash
 mount -o subvol=@,compress=zstd,noatime /dev/sda3 /mnt
@@ -132,16 +132,16 @@ mount /dev/sda1 /mnt/boot/efi
 
 ```bash
 pacstrap /mnt \
-  # minimal tty — boots to a shell, nothing more
+  # base
   base base-devel linux linux-firmware amd-ucode grub efibootmgr networkmanager neovim zsh git \
 
-  # tty + daily-driver utilities — bluetooth, compression, audio, drives, scheduler
+  # utilities — bluetooth, compression, audio, drives, scheduler
   bluez bluez-utils zram-generator pacman-contrib btrfs-progs pipewire-pulse ntfs-3g gvfs gvfs-mtp cronie \
 
   # hyprland desktop — wm, bar, launcher, notifications, screenshot, clipboard, media
   hyprland hypridle hyprlock hyprpicker waybar rofi-wayland awww swaync nwg-look orchis-theme foot mpv gthumb cliphist wl-clipboard grim slurp brightnessctl zsh-autosuggestions zsh-syntax-highlighting starship fastfetch udisks2 btop fd yazi jq 7zip \
 
-  # dev / data stack — containers, git tuis, notes
+  # dev stack — containers, tuis, notes
   docker docker-compose lazygit lazydocker obsidian
 ```
 
@@ -204,17 +204,12 @@ passwd kuro
 EDITOR=nvim visudo               # uncomment: %wheel ALL=(ALL:ALL) ALL
 ```
 
-> `-s /usr/bin/zsh` sets Zsh as the default shell — no `chsh` needed later.
-
-#### 6.6  Copy Home Folder from USB
+#### 6.6  Clone Dotfiles
 
 ```bash
-lsblk
-mkdir /usb
-mount /dev/sdX1 /usb             # replace sdX1 with your USB partition
-cp -r /usb/. /home/kuro/
-umount /usb
-rmdir /usb
+git clone https://github.com/Mayank-cs-2004/dotfiles.git /tmp/dotfiles
+cp -r /tmp/dotfiles/home/. /home/kuro/
+rm -rf /tmp/dotfiles
 chown -R kuro:kuro /home/kuro
 ```
 
@@ -228,19 +223,14 @@ compression-algorithm = zstd
 EOF
 ```
 
-> Without this file, `zram-generator` is installed but does nothing.
-
 #### 6.8  Enable Services
 
 ```bash
 systemctl enable NetworkManager
 systemctl enable bluetooth
 systemctl enable docker
-systemctl enable fstrim.timer
+systemctl enable fstrim.timer    # weekly SSD TRIM
 ```
-
-> `fstrim.timer` runs a weekly TRIM pass on your SSD — keeps write performance healthy
-> over time. Uses zero RAM, it's just a scheduled job.
 
 ---
 
@@ -251,7 +241,7 @@ grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
-> Look for a `microcode` line in the `grub-mkconfig` output — confirms `amd-ucode` was picked up correctly.
+> Verify a `microcode` line appears in the `grub-mkconfig` output — confirms `amd-ucode` was picked up.
 
 ---
 
@@ -259,11 +249,9 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 ```bash
 exit                             # exit chroot
-umount -R /mnt                   # unmount everything
+umount -R /mnt                   # unmount all
 reboot
 ```
-
-> Remove the USB drive when the machine powers off.
 
 ---
 
@@ -274,30 +262,20 @@ reboot
 ### 9 · Connect & Verify
 
 ```bash
-nmtui                            # TUI for Wi-Fi — NetworkManager starts automatically
+nmtui                            # connect to Wi-Fi
 ```
-
-**Brightness control** — add user to the `video` group so `brightnessctl` works without sudo:
 
 ```bash
-sudo usermod -aG video kuro
+sudo usermod -aG video kuro      # brightnessctl without sudo — re-login to apply
 ```
-
-> Log out and back in for the group change to take effect.
-
-**Apply GTK theme:**
 
 ```bash
-nwg-look
+nwg-look                         # apply GTK theme, icons, cursor, font
 ```
-
-> Run once to apply the Orchis theme system-wide — sets GTK theme, icon theme, cursor, and font.
 
 ---
 
 ### 10 · Yay + AUR Packages
-
-*Running as `kuro` in your real session — no `su` gymnastics needed.*
 
 **Build and install Yay:**
 
@@ -306,8 +284,8 @@ git clone https://aur.archlinux.org/yay.git
 cd yay && makepkg -si
 cd ..
 rm -rf yay
-rm -rf ~/.cache/go              # remove Go build cache left behind by yay compilation
-sudo pacman -Rns go             # remove Go toolchain — only needed to build yay
+rm -rf ~/.cache/go              # remove Go build cache
+sudo pacman -Rns go             # remove Go toolchain
 ```
 
 **AUR packages:**
@@ -316,22 +294,21 @@ sudo pacman -Rns go             # remove Go toolchain — only needed to build y
 yay -S --needed timeshift-autosnap helium-browser-bin mpv-uosc-git localsend-bin overskride-bin hyprpolkitagent
 ```
 
-> **timeshift-autosnap** — pacman hook that snapshots before every upgrade automatically.
-> Zero manual effort required.
+> **timeshift-autosnap** — hooks into pacman and snapshots before every upgrade automatically.
 
 ---
 
 ### 11 · Timeshift Setup *(once)*
 
-#### 11.1  Initialize Drive
+#### 11.1  Initialize
 
 ```bash
-sudo timeshift --list-devices   # detects Btrfs subvolumes and generates the config file
+sudo timeshift --list-devices   # generates /etc/timeshift/timeshift.json
 ```
 
-#### 11.2  Configure Timeshift
+#### 11.2  Configure
 
-3 daily snapshots · root `@` only · `@home` excluded.
+3 daily snapshots · `@` only · `@home` excluded.
 
 ```bash
 UUID=$(lsblk -dno UUID /dev/sda3)
@@ -371,8 +348,6 @@ EOF
 sudo nvim /etc/timeshift-autosnap.conf
 ```
 
-Set these values:
-
 ```
 maxSnapshots=2
 snapshotInterval=0
@@ -381,15 +356,15 @@ snapshotInterval=0
 #### 11.4  Enable Cronie
 
 ```bash
-sudo systemctl enable --now cronie    # starts the service that handles the daily schedule check
+sudo systemctl enable --now cronie
 ```
 
 **Verify:**
 
 ```bash
-sudo timeshift --list            # view snapshot list
+sudo timeshift --list            # list snapshots
 sudo timeshift --check           # check schedule
-sudo pacman -S fastfetch         # test pacman hook — autosnap should trigger
+sudo pacman -S fastfetch         # trigger autosnap hook
 ```
 
 ---
@@ -400,7 +375,7 @@ sudo pacman -S fastfetch         # test pacman hook — autosnap should trigger
 
 ```bash
 sudo usermod -aG docker kuro
-newgrp docker                    # apply without logging out
+newgrp docker                    # apply without re-login
 docker run hello-world           # verify
 ```
 
