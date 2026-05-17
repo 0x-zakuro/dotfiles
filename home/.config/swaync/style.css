@@ -1,0 +1,308 @@
+/* * SWAYNC STYLE CONFIGURATION */
+@import "/home/kuro/.config/hypr/colors.css";
+
+/* --- Global Settings --- */
+* {
+  color: @text_off_white;
+  all: unset;
+  font-family: "UbuntuMonoNerdFontPropo";
+  font-size: 20px;
+}
+
+.blank-window {
+  background: transparent;
+}
+
+/* --- CONTROL CENTER (Main Window) --- */
+.control-center {
+  background: alpha(@base_dark, 0.95);
+  border-radius: 6px;
+  box-shadow: 0 0 22px 0 alpha(@text_black, 0.9);
+  margin: 0;
+  padding: 12px;
+}
+
+/* --- Title Widget --- */
+.widget-title {
+  color: @text_white;
+  font-weight: 800;
+  font-size: 1.5rem;
+  margin: 8px 6px;
+}
+
+.widget-title button {
+  background: @base_lighter;
+  color: @text_inactive;
+  border-radius: 6px;
+  padding: 4px 16px;
+  font-weight: normal;
+  font-size: 0.9rem;
+}
+
+.widget-title button:hover {
+  background-color: @text_off_white;
+  color: @text_black;
+}
+
+/* --- DND Widget --- */
+.widget-dnd {
+  color: @text_off_white;
+  font-weight: 800;
+  margin: 6px;
+  font-size: 1.2rem;
+}
+
+.widget-dnd > switch {
+  background: @base_lightest;
+  border-radius: 8px;
+  padding: 2px;
+  border: 1px solid @base_lightest_2;
+}
+
+.widget-dnd > switch:checked {
+  background: @text_off_white;
+  border: 1px solid @text_white;
+}
+
+.widget-dnd > switch slider {
+  background: @base_lightest_2;
+  border-radius: 6px;
+}
+
+.widget-dnd > switch:checked slider {
+  background: @text_black;
+}
+
+/* --- Volume & Backlight Sliders --- */
+.widget-volume {
+    background: @base_light;
+    padding: 16px 20px;
+    margin: 6px 6px 0px 6px; /* 0px bottom margin */
+    border-radius: 12px 12px 0px 0px; /* Only top corners rounded */
+}
+
+/* --- Brightness Slider (Bottom Part of the block) --- */
+.widget-backlight {
+    background: @base_light;
+    padding: 16px 20px;
+    margin: 0px 6px 6px 6px; /* 0px top margin */
+    border-radius: 0px 0px 12px 12px; /* Only bottom corners rounded */
+}
+
+/* Ensure the labels inside look consistent */
+.widget-volume label, .widget-backlight label {
+    font-size: 20px;
+    margin-right: 15px;
+    color: @text_off_white;
+}
+
+scale trough {
+    min-height: 10px;
+    border-radius: 12px;
+    background-color: @base_lightest;
+}
+
+scale trough highlight {
+    border-radius: 12px;
+    background-color: @text_off_white;
+}
+
+/* --- MAIN BUTTONS GRID --- */
+.widget-buttons-grid {
+  font-size: x-large;
+  padding: 6px;
+  margin: 6px;
+  border-radius: 12px;
+  background: @base_light;
+}
+
+.widget-buttons-grid>flowbox>flowboxchild>button {
+  margin: 4px;
+  min-width: 50px;
+  min-height: 40px;
+  padding: 0px;
+  background: transparent;
+  border-radius: 8px;
+  color: @text_off_white;
+  transition: all 0.2s ease;
+}
+
+.widget-buttons-grid>flowbox>flowboxchild>button:hover {
+  background: @text_white;
+  color: @text_black;
+}
+
+.widget-buttons-grid>flowbox>flowboxchild>button:checked {
+  background: @text_off_white;
+  color: @text_black;
+  box-shadow: 0 0 8px 0 alpha(@text_white, 0.4);
+}
+
+/* --- BOTTOM POWER ROW (Danger Grid) --- */
+.widget-buttons-grid#power {
+  font-size: x-large;
+  padding: 6px;
+  margin: 6px;
+  margin-top: 12px;
+  border-radius: 12px;
+  background: @base_light;
+}
+
+.widget-buttons-grid#power>flowbox>flowboxchild>button {
+  margin: 4px;
+  min-width: 50px;
+  min-height: 40px;
+  padding: 0px;
+  background: transparent;
+  border-radius: 8px;
+  color: @text_off_white;
+  transition: all 0.2s ease;
+}
+
+.widget-buttons-grid#power>flowbox>flowboxchild>button:hover {
+  background: @text_off_white;
+  color: @base_lightest;
+  box-shadow: 0 0 8px 0 alpha(@text_white, 0.4);
+}
+
+/* --- Notifications (In Center & Floating) --- */
+.notification-row {
+  outline: none;
+  margin: 0;
+  padding: 2px;
+}
+
+.notification-background {
+  background-color: @base_light;
+  border-radius: 16px;
+  margin: 6px 0px;
+  padding: 2px;
+  border: 1px solid @base_lighter;
+}
+
+.notification-background:hover {
+  background-color: @base;
+}
+
+.floating-notifications.background .notification-row .notification-background {
+  background: alpha(@base_dark, 0.80);
+  box-shadow: 0 0 8px 0 alpha(@text_black, 0.6);
+  border: 1px solid @text_white;
+  border-radius: 14px;
+  margin: 4px;
+}
+
+.notification.critical {
+  background-color: @text_white;
+  color: @base_lightest;
+  border: 1px solid @text_off_white;
+  border-radius: 12px;
+}
+
+.notification-content {
+  margin: 4px;
+  padding: 4px;
+}
+
+.image {
+  margin: 10px 20px 10px 10px;
+}
+
+.summary {
+  font-weight: 800;
+  font-size: 20px;
+  color: @text_off_white;
+}
+
+.body {
+  font-size: 18px;
+  margin-top: 5px;
+  color: @text_inactive;
+}
+
+.time {
+  font-size: 16px;
+  color: @text_inactive;
+  opacity: 0.8;
+}
+
+/* Actions inside notifications */
+.notification-action {
+  background: @base_lighter;
+  color: @text_white;
+  border-radius: 12px;
+  margin: 6px;
+}
+
+.notification-action:hover {
+  background: @text_white;
+  color: @text_black;
+  box-shadow: 0 0 4px alpha(@text_white, 0.4);
+}
+
+/* Close Button */
+.close-button {
+  background: transparent;
+  border-radius: 6px;
+  color: @text_inactive;
+  margin: 10px;
+  padding: 4px;
+}
+
+.close-button:hover {
+  background-color: @text_white;
+  color: @base_lightest;
+}
+
+progressbar, progress, trough {
+  border-radius: 12px;
+}
+
+progressbar {
+  background-color: @base_lightest;
+}
+
+.notification.critical progress {
+  background-color: @base_lightest;
+}
+
+.notification.low progress,
+.notification.normal progress {
+  background-color: @text_white;
+}
+
+/* --- EMPTY STATE / "NO NOTIFICATIONS" FIX --- */
+.notification-placeholder,
+.notification-placeholder label {
+  color: @text_inactive;
+}
+
+.widget-notifications label,
+.widget-notifications image,
+.widget-notifications .icon {
+  color: @text_white;
+}
+
+.widget-notifications .notification-row label,
+.widget-notifications .notification-row .summary {
+  color: @text_off_white;
+}
+
+.widget-notifications .notification-row .body,
+.widget-notifications .notification-row .time {
+  color: @text_inactive;
+}
+
+.notification-placeholder,
+.notification-placeholder image,
+.notification-placeholder label {
+  opacity: 0;
+  color: transparent;
+  background: transparent;
+  font-size: 0px;
+  min-height: 0px;
+  min-width: 0px;
+  margin: 0px;
+  padding: 0px;
+  border: none;
+}

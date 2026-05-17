@@ -139,7 +139,7 @@ pacstrap /mnt \
   bluez bluez-utils zram-generator pacman-contrib btrfs-progs pipewire-pulse ntfs-3g gvfs gvfs-mtp cronie \
 
   # hyprland desktop — wm, bar, launcher, notifications, screenshot, clipboard, media
-  hyprland hypridle hyprlock hyprpicker lxqt-policykit waybar rofi-wayland awww swaync nwg-look orchis-theme foot mpv gthumb cliphist wl-clipboard grim slurp brightnessctl zsh-autosuggestions zsh-syntax-highlighting starship fastfetch udisks2 btop fd yazi jq 7zip \
+  hyprland hypridle hyprlock hyprpicker waybar rofi-wayland awww swaync nwg-look orchis-theme foot mpv gthumb cliphist wl-clipboard grim slurp brightnessctl zsh-autosuggestions zsh-syntax-highlighting starship fastfetch udisks2 btop fd yazi jq 7zip \
 
   # dev / data stack — containers, git tuis, notes
   docker docker-compose lazygit lazydocker obsidian
@@ -313,7 +313,7 @@ sudo pacman -Rns go             # remove Go toolchain — only needed to build y
 **AUR packages:**
 
 ```bash
-yay -S --needed timeshift-autosnap helium-browser-bin mpv-uosc-git localsend-bin overskride-bin
+yay -S --needed timeshift-autosnap helium-browser-bin mpv-uosc-git localsend-bin overskride-bin hyprpolkitagent
 ```
 
 > **timeshift-autosnap** — pacman hook that snapshots before every upgrade automatically.

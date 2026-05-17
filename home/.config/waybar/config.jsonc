@@ -1,0 +1,135 @@
+// =========================================================================
+// WAYBAR CONFIGURATION
+// Structure: Minimal Pill Design
+// Documentation: https://github.com/Alexays/Waybar/wiki
+// =========================================================================
+
+{
+    // =========================================================================
+    // 1. BAR POSITION & LAYOUT
+    // =========================================================================
+    "layer":         "top",          // Renders Waybar above standard windows
+    "position":      "top",          // Attaches the bar to the top of the screen
+    "margin-top":    4,              // Pushes the bar 4px down from the top edge
+    "margin-left":   5,              // 5px gap from the left side of the monitor
+    "margin-right":  5,              // 5px gap from the right side of the monitor
+    "margin-bottom": 0,
+    
+    // CRITICAL: Keep spacing at 0. Gaps between pills are handled by CSS margins.
+    // If you change this, your merged Hardware pill will break apart.
+    "spacing":       0,
+
+
+    // =========================================================================
+    // 2. MODULE ALIGNMENT
+    // Determines which side of the screen your modules appear on.
+    // =========================================================================
+    "modules-left":   ["clock", "group/hardware", "hyprland/workspaces"], 
+    "modules-center": ["hyprland/window"],
+    "modules-right":  ["mpris", "battery", "custom/notification"], 
+
+
+    // =========================================================================
+    // 3. HYPRLAND MODULES
+    // =========================================================================
+    
+    // Displays the name of the currently focused application
+    "hyprland/window": {
+        "format":  "{class}",
+        "rewrite": { 
+            // If the workspace is completely empty (^$), display the Arch logo instead
+            "^$": "<span color = '#1793d1'></span> " 
+        }
+    },
+
+    // Displays your active and open workspaces
+    "hyprland/workspaces": {
+        "disable-scroll": true,       // Prevents accidental workspace switching via scroll
+        "on-click":       "activate", // Clicking a number switches directly to that workspace
+        "format":         "{name}"
+    },
+
+
+    // =========================================================================
+    // 4. SYSTEM INFO
+    // =========================================================================
+
+    "clock": {
+        // Formats as: [Day, Month Date  Hour:Minute] (e.g., Thu, Apr 16  14:43)
+        "format":         "{:%a,%b %d   %H:%M}",
+        // Hovering over the clock displays a full calendar popup
+        "tooltip-format": "<tt>{calendar}</tt>"
+    },
+
+    // The wrapper that glues your Memory and CPU modules together
+    "group/hardware": {
+        "orientation": "horizontal",
+        "spacing":     0,             // Forces RAM and CPU text to sit next to each other
+        "modules": [
+            "memory",
+            "cpu"
+        ]
+    },
+
+    // Format: 3.1GB
+    "memory": { 
+        "format": "{used:0.1f}GB" 
+    }, 
+    
+    // Format: 15% (With two leading spaces to separate it visually from the RAM)
+    "cpu": { 
+        "format": "  {usage}%" 
+    },   
+
+
+    // =========================================================================
+    // 5. MEDIA, BATTERY & NOTIFICATIONS
+    // =========================================================================
+
+    // Media Player Control (MPRIS)
+    "mpris": {
+        "format":         "{status_icon}<i>{title}</i>",
+        "format-paused":  "{status_icon}    {title}",          // Italicizes title when paused
+        "max-length":     50,                                  // Truncates super long song titles
+        "status-icons": {
+            // Uses Pango markup to colorize the play/pause buttons
+            "playing": "<span color = '#ff3870'>‎   </span>", // Red pause icon
+            "paused":  "<span color = '#00ff41'>‎ </span>",   // Green play icon
+            "stopped": " "
+        }, 
+        "on-click":       "playerctl play-pause",              // Clicking the module toggles 
+        "on-scroll-up":   "playerctl previous",                // Scroll up to previous
+        "on-scroll-down": "playerctl next"                     // Scroll down to next
+    },
+
+    // Battery
+    "battery": {
+        "states": {
+            "good":     95,
+            "warning":  30,
+            "critical": 15
+        },
+        "format":          "{capacity}% <span color='#00ff41'>{icon}</span>",
+        "format-charging": "{capacity}% <span color='#00ff41'>󰂄</span>",
+        "format-plugged":  "{capacity}% <span color='#00ff41'></span>",
+        "format-alt":      "{time}",
+        "format-icons":    ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
+    },
+
+    // Sway Notification Center (SwayNC) Integration
+    "custom/notification": {
+        "tooltip":      false,
+        // The icon is colored yellow (#ffe600), the text inherits the default white
+        "format":       "<span color = '#ffe600'>{icon}</span> {text}",
+        "format-icons": {
+            "notification":     "󱅫", // Icon when you have unread notifications
+            "none":             "󰂚", // Icon when inbox is empty
+            "dnd-notification": "󱅫", // Icon for Do Not Disturb (with unread)
+            "dnd-none":         "󰂛"  // Icon for Do Not Disturb (empty)
+        },
+        "return-type":  "json",
+        "exec":         "swaync-client -swb",  // Subscribes Waybar to SwayNC updates
+        "on-click":     "swaync-client -t -sw",// Left-click opens the notification panel
+        "escape":       true
+    }
+}

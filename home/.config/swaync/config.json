@@ -1,0 +1,138 @@
+{
+  "$schema": "/etc/xdg/swaync/configSchema.json",
+  "positionX": "right",
+  "positionY": "top",
+  "timeout": 5,
+  "timeout-low": 3,
+  "timeout-critical": 10,
+  "control-center-margin-top": 10,
+  "control-center-margin-bottom": 10,
+  "control-center-margin-right": 10,
+  "notification-window-width": 350,
+  "control-center-width": 380,
+  "control-center-height": 800,
+  "fit-to-screen": true,
+  "layer": "overlay",
+  "control-center-layer": "top",
+  "layer-shell": true,
+  "cssPriority": "user",
+  "hide-on-action": false,
+  "script-fail-notify": true,
+  "ignore-gtk-theme": true,
+  "widgets": [
+    "title",
+    "dnd",
+    "buttons-grid",
+    "volume",
+    "backlight",
+    "notifications",
+    "buttons-grid#power"
+  ],
+  "widget-config": {
+    "title": {
+      "clear-all-button": true,
+      "button-text": "Clear"
+    },
+    "dnd": {},
+    "notifications": {},
+    "volume": {
+      "label": "󰕾"
+    },
+    "backlight": {
+      "label": "",
+      "device": "amdgpu_bl2"
+    },
+    "buttons-grid": {
+      "actions": [
+        {
+          "label": "󰖩",
+          "type": "toggle",
+          "command": "rfkill toggle wifi",
+          "update-command": "sh -c 'nmcli -t radio wifi | grep -q enabled && echo true || echo false'"
+        },
+        {
+          "label": "󰂯",
+          "type": "toggle",
+          "command": "rfkill toggle bluetooth",
+          "update-command": "sh -c 'rfkill -o TYPE,SOFT -n | grep bluetooth | grep -q unblocked && echo true || echo false'"
+        },
+        {
+          "label": "󰕾",
+          "type": "toggle",
+          "command": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+          "update-command": "sh -c 'wpctl get-volume @DEFAULT_AUDIO_SINK@ | grep -q MUTED && echo false || echo true'"
+        },
+        {
+          "label": "󰍬",
+          "type": "toggle",
+          "command": "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle",
+          "update-command": "sh -c 'wpctl get-volume @DEFAULT_AUDIO_SOURCE@ | grep -q MUTED && echo false || echo true'"
+        },
+        {
+          "label": "",
+          "type": "toggle",
+          "command": "/home/kuro/.config/scripts/nightlight.sh",
+          "update-command": "sh -c 'hyprctl getoption decoration:screen_shader | grep -q nightlight && echo true || echo false'"
+        },
+        {
+          "label": "󰅶",
+          "type": "toggle",
+          "command": "/home/kuro/.config/scripts/caffeine_mode.sh",
+          "update-command": "sh -c 'pgrep -x hypridle >/dev/null && echo false || echo true'"
+        },
+        {
+          "label": "",
+          "command": "/home/kuro/.config/scripts/switch_wallpaper.sh"
+        },
+        {
+          "label": "󰈊",
+          "command": "/home/kuro/.config/scripts/color_picker.sh"
+        },
+        {
+          "label": "󰎚",
+          "command": "hyprctl dispatch exec '[float; size 1200 800; center] obsidian'"
+        },
+        {
+          "label": "",
+          "command": "hyprctl keyword monitor $(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name, (.scale - 0.2)' | xargs printf '%s,preferred,auto,%g')"
+        },
+        {
+          "label": "",
+          "command": "hyprctl keyword monitor $(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name, (.scale + 0.2)' | xargs printf '%s,preferred,auto,%g')"
+        },
+        {
+          "label": "󰥷",
+          "command": "/home/kuro/.config/scripts/image_search.sh"
+        }
+      ]
+    },
+    "buttons-grid#power": {
+  "actions": [
+    {
+      "label": "󰍃",
+      "command": "hyprctl dispatch exit"
+    },
+    {
+      "label": "󰌾",
+      "command": "loginctl lock-session"
+    },
+    {
+      "label": "󰒓",
+      "command": "systemctl reboot --firmware-setup"
+    },
+    {
+      "label": "",
+      "command": "systemctl reboot"
+    },
+    {
+      "label": "",
+      "command": "/home/kuro/.config/scripts/arch_reboot.sh"
+    },
+    {
+      "label": "⏻",
+      "command": "systemctl poweroff"
+    }
+  ]
+}
+  }
+}

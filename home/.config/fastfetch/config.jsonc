@@ -1,0 +1,82 @@
+{
+    "logo": {
+        "source": "~/.config/fastfetch/logo.txt",
+        "padding": {
+            "top": 2,
+            "right": 2
+        },
+        "color": {
+            "1": "cyan" 
+        }
+    },
+    "display": {
+        "separator": "  ", 
+        "key": {
+            "width": 12 
+        }
+    },
+    "modules": [
+        "break",
+        "break",
+        {
+            "type": "custom",
+            "format": "\u001b[37m Hey, \u001b[36mKuro \u001b[37mhere. I use \u001b[36mArch\u001b[37m, btw!"
+        },
+        {
+            "type": "custom",
+            "format": "\u001b[31m╭───────────────────────────────────────────────────────"
+        },
+        {
+            "type": "title",
+            "key": "\u001b[31m│ \u001b[31mTitle",
+            "format": "{user-name}@{host-name}",
+            "color": {
+            "user": "white",
+            "at": "white",
+            "host": "white"
+            }
+        },
+        {
+            "type": "os",
+            "key": "\u001b[31m│ \u001b[34mOs"
+        },
+        {
+            "type": "kernel",
+            "key": "\u001b[31m│ \u001b[32mKernel"
+        },
+        {
+            "type": "uptime",
+            "format": "{2}h {3}m",
+            "key": "\u001b[31m│ \u001b[34mUptime"
+        },
+        {
+            "type": "shell",
+            "key": "\u001b[31m│ \u001b[32mShell"
+        },
+        {
+            "type": "packages",
+            "format": "{} (pacman)",
+            "key": "\u001b[31m│ \u001b[34mPkgs"
+        },
+        {
+            "type": "host",
+            "key": "\u001b[31m│ \u001b[32mHost"
+        },
+        {
+            "type": "cpu",
+            "key": "\u001b[31m│ \u001b[34mCpu"
+        },
+        {
+            "type": "disk",
+            "key": "\u001b[31m│ \u001b[32mDisk"
+        },
+        {
+            "type": "memory",
+            "key": "\u001b[31m│ \u001b[34mMemory"
+        },
+        {
+            "type": "custom",
+            "format": "\u001b[31m╰───────────────────────────────────────────────────────"
+        }
+    ]
+}

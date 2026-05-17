@@ -1,0 +1,109 @@
+# ─────────────────────────────────────────────
+#  Starship Prompt — Oxocarbon hex colors
+# ─────────────────────────────────────────────
+
+format = """$username$hostname $directory$git_branch$git_status$aws$terraform$kubernetes$docker_context$python$nodejs$fill$cmd_duration $time$line_break$character"""
+
+# #42be65 = Oxocarbon green, #ee5396 = Oxocarbon red/pink
+[character]
+success_symbol = "[ ](bold #42be65)"
+error_symbol   = "[ ](bold #ee5396)"
+
+[fill]
+symbol = "─"
+style  = "#333333"
+
+[time]
+disabled    = false
+time_format = "%T "
+style       = "#ffffff"
+format      = "[$time]($style)"
+
+[username]
+show_always = true
+style_user  = "#9e9e9e"
+style_root  = "bold #ee5396"
+format      = "[$user]($style)"
+
+[hostname]
+ssh_only = false
+style    = "#9e9e9e"
+format   = "[@$hostname]($style)"
+
+[directory]
+style             = "bold #3ddbd9"
+truncation_length = 4
+truncate_to_repo  = true
+format            = "[$path]($style)[$read_only]($read_only_style) "
+read_only         = "󰌾 "
+read_only_style   = "#ee5396"
+
+# 󰊢 git — green when clean
+[git_branch]
+symbol = " "
+style  = "bold #42be65"
+format = "[$symbol$branch]($style) "
+
+# red when dirty
+[git_status]
+format     = "([$all_status$ahead_behind]($style) )"
+style      = "bold #ee5396"
+conflicted = "⚡"
+ahead      = "⇡${count}"
+behind     = "⇣${count}"
+diverged   = "⇕⇡${ahead_count}⇣${behind_count}"
+untracked  = "?${count}"
+stashed    = "↓"
+modified   = "!${count}"
+staged     = "+${count}"
+deleted    = "-${count}"
+
+# 󰸏 aws
+[aws]
+symbol = "󰸏 "
+style  = "bold #ff7eb6"
+format = "[$symbol$profile( \\($region\\))]($style) "
+
+[aws.profile_aliases]
+# "prod" = "⚠ PROD"
+
+# 󱁢 terraform
+[terraform]
+symbol = "󱁢 "
+style  = "bold #be95ff"
+format = "[$symbol$workspace]($style) "
+
+# 󱃾 kubernetes
+[kubernetes]
+disabled = false
+symbol   = "󱃾 "
+style    = "bold #33b1ff"
+format   = "[$symbol$context( \\($namespace\\))]($style) "
+
+# 󰡨 docker
+[docker_context]
+symbol = "󰡨 "
+style  = "bold #33b1ff"
+format = "[$symbol$context]($style) "
+
+# 󰌠 python
+[python]
+symbol            = "󰌠 "
+style             = "bold #be95ff"
+format            = "[$symbol$pyenv_prefix($version)(\\($virtualenv\\))]($style) "
+detect_files      = ["*.py", "pyproject.toml", "Pipfile", ".python-version"]
+detect_extensions = ["py"]
+
+#  node
+[nodejs]
+symbol            = "󰎙 "
+style             = "bold #42be65"
+format            = "[$symbol$version]($style) "
+detect_files      = ["package.json", ".node-version"]
+detect_extensions = ["js", "ts"]
+
+[cmd_duration]
+min_time = 2000
+style    = "#888888"
+format   = "[$duration]($style) "
+

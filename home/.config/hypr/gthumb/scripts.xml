@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scripts version="1.1">
+  <script command="swww img &quot;%f&quot;" display-name="Set Wallpaper" for-each-file="false" id="YWJIlxdw" shell-script="true" wait-command="false"/>
+</scripts>
