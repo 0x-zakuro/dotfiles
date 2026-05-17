@@ -4,8 +4,8 @@ Minimal, keyboard-driven Arch Linux setup running Hyprland on Wayland. Oxocarbon
 
 ---
 
-![desktop + waybar](preview/desktop+waybar.png)
-![swaync](preview/swaync.png)
+![desktop + waybar + swaync](preview/desktop_waybar_swaync.png)
+![foot](preview/foot.png)
 ![lazyvim](preview/lazyvim.png)
 
 
