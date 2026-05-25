@@ -16,13 +16,16 @@ B="\e[1m"
 
 PK="\e[38;5;219m" # pink
 SG="\e[38;5;114m" # sage green
-SY="\e[38;5;214m" # amber
+SY="\e[38;5;214m" # amber / yellow
 SO="\e[38;5;208m" # orange
 SR="\e[38;5;203m" # red
 PU="\e[38;5;141m" # purple
 SB="\e[38;5;111m" # sky blue
 
-N1="\e[38;5;255m"
+BL="\e[38;2;51;177;255m" # #33b1ff (Selection Highlight)
+VG="\e[38;2;46;204;113m" # Verdant Green (Sliders)
+
+N1="\e[38;5;255m" # White
 N2="\e[38;5;252m"
 N3="\e[38;5;249m"
 N4="\e[38;5;245m"
@@ -105,14 +108,17 @@ zoom_in() {
 bar() {
   local pct=$1 w=${2:-12} f i s=""
   f=$((pct * w / 100))
+  s+="${VG}" # Verdant green
   for ((i = 0; i < f; i++)); do s+="█"; done
+  s+="${N6}" # Dark gray for unselected part
   for ((i = 0; i < w - f; i++)); do s+="░"; done
-  printf "%s" "$s"
+  s+="${R}"
+  printf "%b" "$s"
 }
 
 dot() {
   case "${1^^}" in
-  ON) printf "${SG}${B}●${R} ${N3}on${R}" ;;
+  ON) printf "${SG}${B}●${R} ${SG}on${R}" ;;
   OFF) printf "${SR}${B}●${R} ${SR}off${R}" ;;
   MILD) printf "${SY}${B}●${R} ${SY}mild${R}" ;;
   WARM) printf "${SO}${B}●${R} ${SO}warm${R}" ;;
@@ -122,8 +128,40 @@ dot() {
 }
 
 section() {
-  printf "\n  ${N6}┄${N5}┄ ${N4}${B}%-10s${R}" "$1"
-  printf "\e[28G${N6}┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄${R}\n"
+  printf "\n  ${N6}┄${N1}┄ ${PU}${B}%-10s${R}" "$1"
+  printf "\e[28G${N6}┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄${R}\n"
+}
+
+draw_header() {
+  local color="$1"
+  local line1="$2"
+  local line2="$3"
+  local line3="$4"
+  local right_text="${5:-}"
+
+  # Detect if line3 is actually the time (e.g. 14:30) passed from menus missing a 3rd line
+  if [[ -z "$right_text" && "$line3" =~ ^[0-9]{1,2}:[0-9]{2} ]]; then
+    right_text="$line3"
+    line3=""
+  fi
+
+  printf "\n"
+  printf "  ${color}${B}%s${R}\n" "$line1"
+  printf "  ${color}${B}%s${R}\n" "$line2"
+
+  if [[ -n "$line3" ]]; then
+    if [[ -n "$right_text" ]]; then
+      local pad=$((72 - ${#line3} - ${#right_text}))
+      ((pad < 1)) && pad=1
+      printf "  ${color}${B}%s${R}%*s${N4}%s${R}\n" "$line3" "$pad" "" "$right_text"
+    else
+      printf "  ${color}${B}%s${R}\n" "$line3"
+    fi
+  elif [[ -n "$right_text" ]]; then
+    local pad=$((72 - ${#right_text}))
+    printf "  %*s${N4}%s${R}\n" "$pad" "" "$right_text"
+  fi
+  printf "\n"
 }
 
 read_key() {
@@ -168,16 +206,16 @@ _row() {
   local idx=$1 icon=$2 label=$3 state=${4:-} pct=${5:-}
 
   if ((SEL == idx)); then
-    printf "  ${PK}${B}▍${R}${BGSEL}${PK}${B} %s  %s" "$icon" "$label"
+    printf "  ${BL}${B}▍${R}${BGSEL}${BL}${B} %s  %s" "$icon" "$label"
     local pad=$((HL_WIDTH - ${#label}))
     ((pad > 0)) && printf "%*s" "$pad" ""
     printf "${R}"
   else
-    printf "    ${N5}%s${R}  ${N2}%-${HL_WIDTH}s${R}" "$icon" "$label"
+    printf "    ${N1}%s${R}  ${N2}%-${HL_WIDTH}s${R}" "$icon" "$label"
   fi
 
   [[ -n "$state" ]] && printf "  %b" "$(dot "$state")"
-  [[ -n "$pct" ]] && printf "\e[K\e[46G${N6}%s${R} ${N4}%s%%${R}" "$(bar "$pct" 10)" "$pct" ||
+  [[ -n "$pct" ]] && printf "\e[K\e[46G%b ${N4}%s%%${R}" "$(bar "$pct" 10)" "$pct" ||
     printf "\e[K"
   printf "\n"
 }
@@ -185,12 +223,10 @@ _row() {
 # ── Main Menu ─────────────────────────────────────────────────────────────────
 render_menu() {
   printf "\e[H\n"
-  printf "  ${N6}╭──────────────────────────────────────────────────────────╮${R}\n"
-  printf "  ${N6}│${R}                                                          ${N6}│${R}\n"
-  printf "  ${N6}│${R}    ${PK}${B}  󱂬  ${R}${N1}${B}Control Center${R}"
-  printf "\e[54G${N5}%s${R}   ${N6}│${R}\n" "$(date +%H:%M)"
-  printf "  ${N6}│${R}                                                          ${N6}│${R}\n"
-  printf "  ${N6}╰──────────────────────────────────────────────────────────╯${R}\n"
+  local l1=' __   __       ___  __   __              __   ___      ___  __   ___ '
+  local l2='/  ` /  \ |\ |  |  |__) /  \ |          /  ` |__  |\ |  |  |__) |__  '
+  local l3='\__, \__/ | \|  |  |  \ \__/ |___       \__, |___ | \|  |  |  \ |___ '
+  draw_header "$SR" "$l1" "$l2" "$l3" "$(date +%H:%M)"
 
   section "NETWORK"
   _row 0 "󰤨" "WiFi" "$C_WIFI"
@@ -215,15 +251,14 @@ render_menu() {
   _row 11 "󰍹" "Monitor Scaling"
   _row 12 "⏻" "Power Menu"
 
-  printf "\n  ${N6}%s${R}\n" "$(printf '┄%.0s' {1..59})"
+  printf "\n  ${N6}%s${R}\n" "$(printf '┄%.0s' {1..72})"
   _row 13 "󰅙" "Exit"
-  printf "\n  ${N7}%s${R}\n" "$(printf '┄%.0s' {1..59})"
-  printf "  ${N6}↑↓${R} ${N7}navigate${R}  ${N6}←→${R} ${N7}adjust${R}  ${N6}Enter${R} ${N7}select${R}  ${N6}q${R} ${N7}quit${R}\n"
+  printf "\n  ${N7}%s${R}\n" "$(printf '┄%.0s' {1..72})"
+  printf "  ${N1}↑↓${R} ${N7}navigate${R}  ${N1}←→${R} ${N7}adjust${R}  ${N1}Enter${R} ${N7}select${R}  ${N1}q${R} ${N7}quit${R}\n"
   printf "\e[J"
 }
 
-# ── WiFi Submenu (unchanged) ──────────────────────────────────────────────────
-# ── WiFi Submenu (non-blocking, no initial freeze) ───────────────────────────
+# ── WiFi Submenu ──────────────────────────────────────────────────────────────
 wifi_menu() {
   local wsel=0 wifi_on connected list_count=0
   local -A nets
@@ -233,7 +268,6 @@ wifi_menu() {
   local last_refresh=0
 
   _wifi_background_scan() {
-    # Run rescan in background, then dump networks to temp file
     nmcli dev wifi rescan >/dev/null 2>&1
     nmcli --terse --fields SSID,SIGNAL,SECURITY dev wifi list >"$scan_temp" 2>/dev/null
   }
@@ -249,7 +283,6 @@ wifi_menu() {
       awk -F: '$1=="yes"{print $2; exit}')
     connected="${connected//$'\r'/}"
 
-    # If temp file exists and is not empty, load from it
     if [[ -f "$scan_temp" ]] && [[ -s "$scan_temp" ]]; then
       local seen=""
       while IFS=':' read -r ssid signal sec; do
@@ -263,7 +296,6 @@ wifi_menu() {
         ((list_count >= 10)) && break
       done <"$scan_temp"
     else
-      # Fallback: direct query (may be empty if no scan done yet)
       local seen=""
       while IFS=':' read -r ssid signal sec; do
         [[ -z "$ssid" ]] && continue
@@ -291,17 +323,15 @@ wifi_menu() {
 
     clear_screen
     printf "\n"
-    printf "  ${SB}${B}╭────────────────────────────────────╮${R}\n"
-    printf "  ${SB}${B}│${R}                                    ${SB}${B}│${R}\n"
-    printf "  ${SB}${B}│${R}    ${SB}${B}󰤨  WiFi Networks${R}"
-    printf "\e[40G${SB}${B}│${R}\n"
-    printf "  ${SB}${B}│${R}                                    ${SB}${B}│${R}\n"
-    printf "  ${SB}${B}╰────────────────────────────────────╯${R}\n\n"
+    local l1='        ___   '
+    local l2='|  | | |__  | '
+    local l3='|/\| | |    | '
+    draw_header "$SR" "$l1" "$l2" "$l3"
 
     if ((wsel == 0)); then
-      printf "  ${BGSEL}${SB}${B} 󰤨  %-24s${R}" "WiFi"
+      printf "  ${BGSEL}${BL}${B} 󰤨  %-24s${R}" "WiFi"
     else
-      printf "  ${N5}󰤨${R}  ${N2}%-24s${R}" "WiFi"
+      printf "  ${N1}󰤨${R}  ${N2}%-24s${R}" "WiFi"
     fi
     printf "  %b\e[K\n" "$(dot "$wifi_on")"
 
@@ -322,12 +352,12 @@ wifi_menu() {
         [[ -z "$sig" ]] && sig="0"
 
         if ((wsel == row)); then
-          printf "      ${BGSEL}${SB}${B} %-22.22s${R}" "$ssid"
+          printf "      ${BGSEL}${BL}${B} %-22.22s${R}" "$ssid"
         else
-          printf "      ${N2}%-22.22s${R}" "$ssid"
+          printf "      ${N2} %-22.22s${R}" "$ssid"
         fi
 
-        printf "\e[32G ${N6}%s${R} ${N4}%3s%%${R}" "$(bar "$sig" 8)" "$sig"
+        printf "\e[32G %b ${N4}%3s%%${R}" "$(bar "$sig" 8)" "$sig"
         [[ "$sec" == *"WPA"* ]] && printf "\e[46G${N5}[WPA]${R}" ||
           printf "\e[46G${N5}[Open]${R}"
         [[ "$ssid" == "$connected" ]] && printf "\e[54G${SG}${B}●${R} ${SG}connected${R}"
@@ -335,20 +365,18 @@ wifi_menu() {
       done
     fi
 
-    printf "\n  ${N6}%s${R}\n" "$(printf '┄%.0s' {1..38})"
+    printf "\n  ${N6}%s${R}\n" "$(printf '┄%.0s' {1..72})"
     local back_row=$((total - 1))
     if ((wsel == back_row)); then
-      printf "  ${BGSEL}${SB}${B} ←  Back%-14s${R}\e[K\n" ""
+      printf "  ${BGSEL}${BL}${B} ←  Back%-14s${R}\e[K\n" ""
     else
-      printf "  ${N5}←${R}  ${N2}Back${R}\n"
+      printf "  ${N1}←${R}  ${N2}Back${R}\n"
     fi
-    printf "\n  ${N6}↑↓${R} ${N7}navigate${R}  ${N6}Enter${R} ${N7}select${R}  ${N6}q${R} ${N7}back${R}\n"
+    printf "\n  ${N1}↑↓${R} ${N7}navigate${R}  ${N1}Enter${R} ${N7}select${R}  ${N1}q${R} ${N7}back${R}\n"
     printf "  ${N6}(Auto‑refresh every 5s, non‑blocking)${R}\n"
   }
 
-  # Initial setup: fetch any existing networks (cached) immediately (no freeze)
   _wifi_fetch_results
-  # Start a background scan if WiFi is on
   if [[ "$wifi_on" == "ON" ]]; then
     _wifi_start_scan
   fi
@@ -360,19 +388,16 @@ wifi_menu() {
     key=$(read_key)
     local now=$(date +%s)
 
-    # Check if background scan finished
     if [[ -n "$scan_pid" ]] && ! kill -0 "$scan_pid" 2>/dev/null; then
       scan_running=0
       _wifi_fetch_results
       _wifi_draw
-      # Start next scan after 5 seconds (auto refresh)
       if [[ "$wifi_on" == "ON" ]]; then
         _wifi_start_scan
         last_refresh=$now
       fi
     fi
 
-    # If no key and no scan running, start a new scan after 5 seconds
     if [[ -z "$key" && $scan_running -eq 0 && "$wifi_on" == "ON" ]]; then
       if ((now - last_refresh >= 5)); then
         _wifi_start_scan
@@ -399,7 +424,6 @@ wifi_menu() {
       ;;
     ENTER)
       if ((wsel == 0)); then
-        # Toggle WiFi
         toggle_wifi
         sleep 0.5
         if [[ "$(wifi_state)" == "ON" ]]; then
@@ -412,7 +436,6 @@ wifi_menu() {
         fi
         _wifi_draw
       elif ((wsel == total - 1)); then
-        # Clean exit
         [[ -n "$scan_pid" ]] && kill "$scan_pid" 2>/dev/null
         rm -f "$scan_temp"
         clear_screen
@@ -423,7 +446,6 @@ wifi_menu() {
         if [[ "$target" == "$connected" ]]; then
           nmcli device disconnect wlan0 2>/dev/null
         else
-          # Try to connect, if password needed prompt
           if ! nmcli device wifi connect "$target" 2>/dev/null; then
             printf "\n\n  ${SY}Password for %s:${R} " "$target"
             stty "$OLD_STTY"
@@ -443,7 +465,6 @@ wifi_menu() {
       fi
       ;;
     OTHER)
-      # Manual refresh: kill current scan, start new one
       if [[ "$wifi_on" == "ON" ]]; then
         [[ -n "$scan_pid" ]] && kill "$scan_pid" 2>/dev/null
         _wifi_start_scan
@@ -460,8 +481,7 @@ wifi_menu() {
   done
 }
 
-# ── Bluetooth Submenu (100% working, 5s refresh, auto-discoverable) ─────────
-# ── Bluetooth Submenu (non‑blocking, reliable connection) ────────────────────
+# ── Bluetooth Submenu ─────────────────────────────────────────────────────────
 bluetooth_menu() {
   local bsel=0
   local -a addrs names status disc_addrs disc_names
@@ -494,18 +514,15 @@ bluetooth_menu() {
     done < <(bluetoothctl devices 2>/dev/null)
   }
 
-  # Background scan – writes discovered devices to temp file
   _bt_background_scan() {
     (
       echo "scan on"
-      sleep 6 # scan for 6 seconds – enough for most headphones
+      sleep 6
       echo "scan off"
     ) | bluetoothctl >/dev/null 2>&1
-    # After scan, dump devices to temp file
     bluetoothctl devices >"$scan_temp" 2>/dev/null
   }
 
-  # Fetch results from latest scan (non‑blocking)
   _bt_fetch_results() {
     bt_on=$(bt_state)
     addrs=()
@@ -518,7 +535,6 @@ bluetooth_menu() {
 
     [[ "$bt_on" == "OFF" ]] && return
 
-    # Paired devices
     local paired_lookup=""
     while read -r line; do
       [[ "$line" =~ ^Device[[:space:]]([0-9A-Fa-f:]+)[[:space:]](.+)$ ]] || continue
@@ -532,7 +548,6 @@ bluetooth_menu() {
       ((dev_count++))
     done < <(bluetoothctl paired-devices 2>/dev/null)
 
-    # Discovered devices from temp file (if any)
     if [[ -f "$scan_temp" ]]; then
       while read -r line; do
         [[ "$line" =~ ^Device[[:space:]]([0-9A-Fa-f:]+)[[:space:]](.+)$ ]] || continue
@@ -548,7 +563,6 @@ bluetooth_menu() {
     fi
   }
 
-  # Start a fresh background scan (kills previous if any)
   _bt_start_scan() {
     if [[ -n "$scan_pid" ]] && kill -0 "$scan_pid" 2>/dev/null; then
       kill "$scan_pid" 2>/dev/null
@@ -565,17 +579,15 @@ bluetooth_menu() {
 
     clear_screen
     printf "\n"
-    printf "  ${PU}${B}╭────────────────────────────────────╮${R}\n"
-    printf "  ${PU}${B}│${R}                                    ${PU}${B}│${R}\n"
-    printf "  ${PU}${B}│${R}    ${PU}${B}󰂯  Bluetooth${R}"
-    printf "\e[40G${PU}${B}│${R}\n"
-    printf "  ${PU}${B}│${R}                                    ${PU}${B}│${R}\n"
-    printf "  ${PU}${B}╰────────────────────────────────────╯${R}\n\n"
+    local l1=' __             ___ ___  __   __  ___      '
+    local l2='|__) |    |  | |__   |  /  \ /  \  |  |__| '
+    local l3='|__) |___ \__/ |___  |  \__/ \__/  |  |  | '
+    draw_header "$SR" "$l1" "$l2" "$l3"
 
     if ((bsel == 0)); then
-      printf "  ${BGSEL}${PU}${B} 󰂯  %-24s${R}" "Bluetooth"
+      printf "  ${BGSEL}${BL}${B} 󰂯  %-24s${R}" "Bluetooth"
     else
-      printf "  ${N5}󰂯${R}  ${N2}%-24s${R}" "Bluetooth"
+      printf "  ${N1}󰂯${R}  ${N2}%-24s${R}" "Bluetooth"
     fi
     printf "  %b\e[K\n" "$(dot "$bt_on")"
 
@@ -587,9 +599,9 @@ bluetooth_menu() {
         for ((i = 0; i < dev_count; i++)); do
           local row=$((i + 1))
           if ((bsel == row)); then
-            printf "      ${BGSEL}${PU}${B} %-22.22s${R}" "${names[$i]}"
+            printf "      ${BGSEL}${BL}${B} %-22.22s${R}" "${names[$i]}"
           else
-            printf "      ${N2}%-22.22s${R}" "${names[$i]}"
+            printf "      ${N2} %-22.22s${R}" "${names[$i]}"
           fi
           if [[ "${status[$i]}" == "connected" ]]; then
             printf "\e[32G${SG}${B}●${R} ${SG}connected${R}"
@@ -605,9 +617,9 @@ bluetooth_menu() {
         for ((i = 0; i < disc_count; i++)); do
           local row=$((dev_count + 1 + i))
           if ((bsel == row)); then
-            printf "      ${BGSEL}${PU}${B} %-22.22s${R}\e[K\n" "${disc_names[$i]}"
+            printf "      ${BGSEL}${BL}${B} %-22.22s${R}\e[K\n" "${disc_names[$i]}"
           else
-            printf "      ${N2}%-22.22s${R}\n" "${disc_names[$i]}"
+            printf "      ${N2} %-22.22s${R}\n" "${disc_names[$i]}"
           fi
         done
       fi
@@ -621,18 +633,17 @@ bluetooth_menu() {
       fi
     fi
 
-    printf "\n  ${N6}%s${R}\n" "$(printf '┄%.0s' {1..38})"
+    printf "\n  ${N6}%s${R}\n" "$(printf '┄%.0s' {1..72})"
     local back_row=$((total - 1))
     if ((bsel == back_row)); then
-      printf "  ${BGSEL}${PU}${B} ←  Back%-14s${R}\e[K\n" ""
+      printf "  ${BGSEL}${BL}${B} ←  Back%-14s${R}\e[K\n" ""
     else
-      printf "  ${N5}←${R}  ${N2}Back${R}\n"
+      printf "  ${N1}←${R}  ${N2}Back${R}\n"
     fi
-    printf "\n  ${N6}↑↓${R} ${N7}navigate${R}  ${N6}Enter${R} ${N7}select${R}  ${N6}q${R} ${N7}back${R}\n"
+    printf "\n  ${N1}↑↓${R} ${N7}navigate${R}  ${N1}Enter${R} ${N7}select${R}  ${N1}q${R} ${N7}back${R}\n"
     printf "  ${N6}(Auto‑refresh every 4s, non‑blocking)${R}\n"
   }
 
-  # Initial setup
   if [[ "$(bt_state)" == "ON" ]]; then
     _bt_ensure_ready
     _bt_clear_stale_cache
@@ -647,19 +658,16 @@ bluetooth_menu() {
     key=$(read_key)
     local now=$(date +%s)
 
-    # Handle background scan completion
     if [[ -n "$scan_pid" ]] && ! kill -0 "$scan_pid" 2>/dev/null; then
       scan_running=0
       _bt_fetch_results
       _bt_draw
-      # Start next scan after 4 seconds (auto refresh)
       if [[ "$bt_on" == "ON" ]]; then
         _bt_start_scan
         last_refresh=$now
       fi
     fi
 
-    # If no key and no scan running, start a new scan after 4 seconds
     if [[ -z "$key" && $scan_running -eq 0 && "$bt_on" == "ON" ]]; then
       if ((now - last_refresh >= 4)); then
         _bt_start_scan
@@ -667,12 +675,10 @@ bluetooth_menu() {
       fi
     fi
 
-    # If no key, just redraw periodically (but we redraw only when scan finishes)
     if [[ -z "$key" ]]; then
       continue
     fi
 
-    # Key pressed – handle navigation/actions
     local total=$((dev_count + disc_count + 2))
 
     case "$key" in
@@ -688,7 +694,6 @@ bluetooth_menu() {
       ;;
     ENTER)
       if ((bsel == 0)); then
-        # Toggle Bluetooth
         toggle_bt
         sleep 0.5
         if [[ "$(bt_state)" == "ON" ]]; then
@@ -696,20 +701,17 @@ bluetooth_menu() {
           _bt_clear_stale_cache
           _bt_start_scan
         else
-          # Kill any ongoing scan
           [[ -n "$scan_pid" ]] && kill "$scan_pid" 2>/dev/null
           scan_running=0
         fi
         _bt_fetch_results
         _bt_draw
       elif ((bsel == total - 1)); then
-        # Clean exit
         [[ -n "$scan_pid" ]] && kill "$scan_pid" 2>/dev/null
         rm -f "$scan_temp"
         clear_screen
         return
       elif [[ "$bt_on" == "ON" ]] && ((bsel <= dev_count)); then
-        # Connect/disconnect paired device
         local idx=$((bsel - 1))
         printf "\n\n  ${PU}${B}Attempting to ${status[$idx]}...${R}\n"
         if [[ "${status[$idx]}" == "connected" ]]; then
@@ -721,12 +723,10 @@ bluetooth_menu() {
         _bt_fetch_results
         _bt_draw
       elif [[ "$bt_on" == "ON" ]] && ((bsel > dev_count)); then
-        # Pair and connect a new device
         local idx=$((bsel - dev_count - 1))
         local target="${disc_addrs[$idx]}"
         local target_name="${disc_names[$idx]}"
         printf "\n\n  ${PU}${B}Pairing with %s...${R}\n" "$target_name"
-        # Try to pair
         if bluetoothctl pair "$target" >/dev/null 2>&1; then
           echo "  ${SG}Pairing successful${R}"
           sleep 1
@@ -745,7 +745,6 @@ bluetooth_menu() {
       fi
       ;;
     OTHER)
-      # Manual refresh: kill current scan, start new one
       if [[ "$bt_on" == "ON" ]]; then
         [[ -n "$scan_pid" ]] && kill "$scan_pid" 2>/dev/null
         _bt_start_scan
@@ -761,15 +760,17 @@ bluetooth_menu() {
     esac
   done
 }
-}# ── Power Menu ────────────────────────────────────────────────────────────────
+
+# ── Power Menu ────────────────────────────────────────────────────────────────
 power_menu() {
-  local psel=0 pmax=6
+  local psel=0 pmax=5
 
   _prow() {
+    # 6 Spaces on left padding to match exact WiFi spacing. Selected has background.
     if ((psel == $1)); then
-      printf "  ${BGSEL}${SR}${B} %s  %-18s${R}\e[K\n" "$2" "$3"
+      printf "      ${BGSEL}${BL}${B} %-22.22s${R}\e[K\n" "$2"
     else
-      printf "  ${N5}%s${R}  ${N2}%-18s${R}\n" "$2" "$3"
+      printf "      ${N2} %-22.22s${R}\n" "$2"
     fi
   }
 
@@ -784,38 +785,36 @@ power_menu() {
   while true; do
     clear_screen
     printf "\n"
-    printf "  ${SR}${B}╭────────────────────────────────────╮${R}\n"
-    printf "  ${SR}${B}│${R}                                    ${SR}${B}│${R}\n"
-    printf "  ${SR}${B}│${R}    ${SR}${B}⏻  Power Menu${R}"
-    printf "\e[40G${SR}${B}│${R}\n"
-    printf "  ${SR}${B}│${R}                                    ${SR}${B}│${R}\n"
-    printf "  ${SR}${B}╰────────────────────────────────────╯${R}\n\n"
+    local l1=' __   __        ___  __            ___           '
+    local l2='|__) /  \ |  | |__  |__)     |\/| |__  |\ | |  | '
+    local l3='|    \__/ |/\| |___ |  \     |  | |___ | \| \__/ '
+    draw_header "$SR" "$l1" "$l2" "$l3"
 
-    _prow 0 "󰍃" "Logout"
-    _prow 1 "󰌾" "Lock Screen"
-    _prow 2 "" "Reboot"
-    _prow 3 "󰒓" "Reboot to BIOS"
-    _prow 4 "" "Arch Reboot"
-    _prow 5 "⏻" "Shutdown"
+    _prow 0 "Logout"
+    _prow 1 "Lock Screen"
+    _prow 2 "Reboot"
+    _prow 3 "Reboot to BIOS"
+    _prow 4 "Arch Reboot"
+    _prow 5 "Shutdown"
 
-    printf "\n  ${N6}%s${R}\n" "$(printf '┄%.0s' {1..38})"
+    printf "\n  ${N6}%s${R}\n" "$(printf '┄%.0s' {1..72})"
     if ((psel == 6)); then
-      printf "  ${BGSEL}${SR}${B} ←  Back%-14s${R}\e[K\n" ""
+      printf "  ${BGSEL}${BL}${B} ←  Back%-14s${R}\e[K\n" ""
     else
-      printf "  ${N5}←${R}  ${N2}Back${R}\n"
+      printf "  ${N1}←${R}  ${N2}Back${R}\n"
     fi
-    printf "\n  ${N6}↑↓${R} ${N7}navigate${R}  ${N6}Enter${R} ${N7}select${R}  ${N6}q${R} ${N7}cancel${R}\n"
+    printf "\n  ${N1}↑↓${R} ${N7}navigate${R}  ${N1}Enter${R} ${N7}select${R}  ${N1}q${R} ${N7}cancel${R}\n"
 
     local key
     key=$(read_key)
     case "$key" in
     UP)
       ((psel--))
-      ((psel < 0)) && psel=$pmax
+      ((psel < 0)) && psel=6
       ;;
     DOWN)
       ((psel++))
-      ((psel > pmax)) && psel=0
+      ((psel > 6)) && psel=0
       ;;
     ENTER)
       case "$psel" in
