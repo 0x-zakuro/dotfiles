@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 1. Path to your wallpapers folder (Change this to your actual folder!)
-WALLPAPER_DIR="/home/kuro/.config/wallpaper/home_screen/"
+WALLPAPER_DIR="/home/kuro/.config/wallpaper/home_wallpapers/"
 
 # 2. File to store the current index (keeps track of where you are)
 STATE_FILE="/tmp/wallpaper_index"
@@ -33,4 +33,3 @@ next_index=$(((current_index + 1) % total_walls))
 
 # 9. Save next index for the next click
 echo "$next_index" >"$STATE_FILE"
-

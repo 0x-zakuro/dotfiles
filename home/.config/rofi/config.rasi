@@ -6,7 +6,7 @@
 /*****----- Configuration -----*****/
 configuration {
     cache-dir:                   "~/.config/rofi";
-    modi:                        "drun,files:~/.config/scripts/rofi-finder.sh,run,Browser:~/.config/scripts/rofi-browser.sh,window";
+    modi:                        "drun,files:~/.config/scripts/rofi_finder.sh,run,Browser:~/.config/scripts/rofi_browser.sh,window";
     show-icons:                  true;
     display-Browser:             "Web";
     display-drun:                "Apps";
@@ -16,7 +16,7 @@ configuration {
     drun-display-format:         "{name}";
     window-format:               "{w} · {c} · {t}";
     terminal:                    "foot";
-    run-command:                 "{cmd}"; 
+    run-command:                 "foot -e {cmd}";
     hover-select:                true;
     kb-cancel:                   "Escape,MousePrimary"; 
 

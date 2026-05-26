@@ -139,7 +139,7 @@ pacstrap /mnt \
   bluez bluez-utils zram-generator pacman-contrib btrfs-progs pipewire-pulse ntfs-3g gvfs gvfs-mtp cronie \
 
   # hyprland desktop — wm, bar, launcher, notifications, screenshot, clipboard, media
-  hyprland hypridle hyprlock hyprpicker waybar rofi-wayland awww swaync nwg-look orchis-theme foot mpv gthumb cliphist wl-clipboard grim slurp brightnessctl zsh-autosuggestions zsh-syntax-highlighting starship fastfetch udisks2 btop fd yazi jq 7zip \
+  hyprland hypridle hyprlock hyprpicker waybar rofi-wayland awww nwg-look foot mpv gthumb cliphist wl-clipboard grim slurp brightnessctl zsh-autosuggestions zsh-syntax-highlighting starship fastfetch udisks2 btop fd yazi jq unzip \
 
   # dev stack — containers, tuis, notes
   docker docker-compose lazygit lazydocker obsidian
@@ -207,7 +207,7 @@ EDITOR=nvim visudo               # uncomment: %wheel ALL=(ALL:ALL) ALL
 #### 6.6  Clone Dotfiles
 
 ```bash
-git clone https://github.com/Mayank-cs-2004/dotfiles.git /tmp/dotfiles
+git clone https://github.com/0x-zakuro/dotfiles.git /tmp/dotfiles
 cp -r /tmp/dotfiles/home/. /home/kuro/
 rm -rf /tmp/dotfiles
 chown -R kuro:kuro /home/kuro
@@ -291,7 +291,7 @@ sudo pacman -Rns go             # remove Go toolchain
 **AUR packages:**
 
 ```bash
-yay -S --needed timeshift-autosnap helium-browser-bin mpv-uosc-git localsend-bin overskride-bin hyprpolkitagent
+yay -S --needed timeshift-autosnap helium-browser-bin mpv-uosc-git hyprpolkitagent
 ```
 
 > **timeshift-autosnap** — hooks into pacman and snapshots before every upgrade automatically.
