@@ -139,7 +139,6 @@ draw_header() {
   local line3="$4"
   local right_text="${5:-}"
 
-  # Detect if line3 is actually the time (e.g. 14:30) passed from menus missing a 3rd line
   if [[ -z "$right_text" && "$line3" =~ ^[0-9]{1,2}:[0-9]{2} ]]; then
     right_text="$line3"
     line3=""
@@ -241,20 +240,14 @@ render_menu() {
   _row 5 "󰖨" "Night Light" "$C_NL"
   _row 6 "󰒳" "Caffeine" "$C_CA"
 
-  section "TOOLS"
-  _row 7 "" "Change Wallpaper"
-  _row 8 "󰈊" "Color Picker"
-  _row 9 "󰎚" "Obsidian"
-  _row 10 "󰥷" "Image Search"
-
   section "SYSTEM"
-  _row 11 "󰍹" "Monitor Scaling"
-  _row 12 "⏻" "Power Menu"
+  _row 7 "󰍹" "Monitor Scaling"
+  _row 8 "⏻" "Power Menu"
 
   printf "\n  ${N6}%s${R}\n" "$(printf '┄%.0s' {1..70})"
-  _row 13 "󰅙" "Exit"
+  _row 9 "󰅙" "Exit"
   printf "\n  ${N7}%s${R}\n" "$(printf '┄%.0s' {1..72})"
-  printf "  ${N1}↑↓${R} ${N7}navigate${R}  ${N1}←→${R} ${N7}adjust${R}  ${N1}Enter${R} ${N7}select${R}  ${N1}q${R} ${N7}quit${R}\n"
+  printf "  ${N1}↑↓${R} ${N4}navigate${R}  ${N1}←→${R} ${N4}adjust${R}  ${N1}Enter${R} ${N4}select${R}  ${N1}q${R} ${N4}quit${R}\n"
   printf "\e[J"
 }
 
@@ -295,19 +288,8 @@ wifi_menu() {
         ((list_count++))
         ((list_count >= 10)) && break
       done <"$scan_temp"
-    else
-      local seen=""
-      while IFS=':' read -r ssid signal sec; do
-        [[ -z "$ssid" ]] && continue
-        [[ "$seen" == *"|$ssid|"* ]] && continue
-        seen+="|$ssid|"
-        nets["ssid_$list_count"]="$ssid"
-        nets["sig_$list_count"]="${signal// /}"
-        nets["sec_$list_count"]="$sec"
-        ((list_count++))
-        ((list_count >= 10)) && break
-      done < <(nmcli --terse --fields SSID,SIGNAL,SECURITY dev wifi list 2>/dev/null)
     fi
+    # No cache file yet — return empty; background scan will populate it
   }
 
   _wifi_start_scan() {
@@ -372,14 +354,15 @@ wifi_menu() {
     else
       printf "  ${N1}←${R}  ${N2}Back${R}\n"
     fi
-    printf "\n  ${N1}↑↓${R} ${N7}navigate${R}  ${N1}Enter${R} ${N7}select${R}  ${N1}q${R} ${N7}back${R}\n"
+    printf "\n  ${N1}↑↓${R} ${N4}navigate${R}  ${N1}Enter${R} ${N4}select${R}  ${N1}q${R} ${N4}back${R}\n"
     printf "  ${N6}(Auto‑refresh every 5s, non‑blocking)${R}\n"
   }
 
-  _wifi_fetch_results
+  wifi_on=$(wifi_state)
   if [[ "$wifi_on" == "ON" ]]; then
     _wifi_start_scan
   fi
+  _wifi_fetch_results
   _wifi_draw
   last_refresh=$(date +%s)
 
@@ -640,7 +623,7 @@ bluetooth_menu() {
     else
       printf "  ${N1}←${R}  ${N2}Back${R}\n"
     fi
-    printf "\n  ${N1}↑↓${R} ${N7}navigate${R}  ${N1}Enter${R} ${N7}select${R}  ${N1}q${R} ${N7}back${R}\n"
+    printf "\n  ${N1}↑↓${R} ${N4}navigate${R}  ${N1}Enter${R} ${N4}select${R}  ${N1}q${R} ${N4}back${R}\n"
     printf "  ${N6}(Auto‑refresh every 4s, non‑blocking)${R}\n"
   }
 
@@ -766,7 +749,6 @@ power_menu() {
   local psel=0 pmax=5
 
   _prow() {
-    # 6 Spaces on left padding to match exact WiFi spacing. Selected has background.
     if ((psel == $1)); then
       printf "      ${BGSEL}${BL}${B} %-22.22s${R}\e[K\n" "$2"
     else
@@ -803,7 +785,7 @@ power_menu() {
     else
       printf "  ${N1}←${R}  ${N2}Back${R}\n"
     fi
-    printf "\n  ${N1}↑↓${R} ${N7}navigate${R}  ${N1}Enter${R} ${N7}select${R}  ${N1}q${R} ${N7}cancel${R}\n"
+    printf "\n  ${N1}↑↓${R} ${N4}navigate${R}  ${N1}Enter${R} ${N4}select${R}  ${N1}q${R} ${N4}cancel${R}\n"
 
     local key
     key=$(read_key)
@@ -875,7 +857,7 @@ main() {
   hide_cursor
   clear_screen
   SEL=0
-  local max=13
+  local max=9
   refresh_state
 
   while true; do
@@ -896,14 +878,14 @@ main() {
     LEFT)
       case "$SEL" in
       2) adj_vol 5 - ;; 3) adj_mic 5 - ;;
-      4) adj_bright - ;; 11) zoom_out ;;
+      4) adj_bright - ;; 7) zoom_out ;;
       esac
       refresh_state
       ;;
     RIGHT)
       case "$SEL" in
       2) adj_vol 5 + ;; 3) adj_mic 5 + ;;
-      4) adj_bright + ;; 11) zoom_in ;;
+      4) adj_bright + ;; 7) zoom_in ;;
       esac
       refresh_state
       ;;
@@ -921,12 +903,8 @@ main() {
       3) toggle_mic ;;
       5) cycle_nl ;;
       6) toggle_caffeine ;;
-      7) ~/.config/scripts/switch_wallpaper.sh 2>/dev/null ;;
-      8) ~/.config/scripts/color_picker.sh 2>/dev/null ;;
-      9) hyprctl dispatch exec '[float;size 1200 800;center] obsidian' ;;
-      10) ~/.config/scripts/image_search.sh 2>/dev/null ;;
-      12) power_menu ;;
-      13) cleanup ;;
+      8) power_menu ;;
+      9) cleanup ;;
       esac
       refresh_state
       ;;
@@ -935,4 +913,4 @@ main() {
   done
 }
 
-main
+main "$@"
