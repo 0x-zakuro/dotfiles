@@ -48,7 +48,7 @@ window#waybar {
 #clock {
     background-color: @base_dark;
     border-radius:    8px;
-    padding:          8px 8px 8px 9px;
+    padding:          8px 8px 8px 8px;
     margin:           2px 6px 2px 5px; /* Locked to 5px from the left monitor edge */
 }
 
@@ -84,24 +84,16 @@ window#waybar {
 #battery {
     background-color: @base_dark;
     border-radius:    8px 0 0 8px;   /* Curves ONLY the left corners */
-    padding:          8px 2px 8px 8px; /* 2px right padding for internal breathing room */
+    padding:          8px 8px 8px 8px; /* 10px left (outer edge), 6px right (inner gap) */
     margin:           2px 0;         /* 0 right margin so it touches Notification */
-}
-
-/* Middle: Notification */
-#custom-notification {
-    background-color: @base_dark;
-    border-radius:    0;             /* No curves — seamlessly merged */
-    padding:          8px 2px;       /* 2px horizontal padding for internal breathing room */
-    margin:           2px 0;
 }
 
 /* Right: Caffeine */
 #custom-caffeine {
     background-color: @base_dark;
     border-radius:    0 8px 8px 0;   /* Curves ONLY the right corners */
-    padding:          8px 8px 8px 2px; /* 2px left padding for internal breathing room */
-    margin:           2px 5px 2px 0; /* Locked to 5px from the right monitor edge */
+    padding:          2px 18px 0px 0px; /* 6px left (inner gap), 10px right (outer edge) */
+    margin:           2px 6px 2px 0; /* Locked to 5px from the right monitor edge */
 }
 
 /* Caffeine ON state (hypridle killed / sleep prevented) — warm amber icon */
@@ -146,4 +138,20 @@ tooltip {
     background:    @base_dark;
     border-radius: 8px;
     font-size:     16px; /* Scaled down slightly to prevent screen clutter */
+}
+
+#battery.critical {
+    color: #ff3333;
+}
+
+#battery.warning {
+    color: #ff8800;
+}
+
+#battery.good {
+    color: #ffe600;
+}
+
+#battery.full {
+    color: #00ff41;
 }

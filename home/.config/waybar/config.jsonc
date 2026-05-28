@@ -1,149 +1,139 @@
-/* =========================================================================
- * WAYBAR STYLESHEET
- * Structure: Minimal Pill Design
- * Dependencies: ~/.config/hypr/colors.css
- * ========================================================================= */
+// =========================================================================
+// WAYBAR CONFIGURATION
+// Structure: Minimal Pill Design
+// Documentation: https://github.com/Alexays/Waybar/wiki
+// =========================================================================
 
-@import "/home/kuro/.config/hypr/colors.css";
+{
+    // =========================================================================
+    // 1. BAR POSITION & LAYOUT
+    // =========================================================================
+    "layer":         "top",          // Renders Waybar above standard windows
+    "position":      "top",          // Attaches the bar to the top of the screen
+    "margin-top":    4,              // Pushes the bar 4px down from the top edge
+    "margin-left":   5,              // 5px gap from the left side of the monitor
+    "margin-right":  5,              // 5px gap from the right side of the monitor
+    "margin-bottom": 0,
 
-
-/* =========================================================================
- * 1. GLOBAL SETTINGS
- * Applies to all elements unless explicitly overridden below.
- * min-height: 0 is required for Waybar to calculate margins/padding correctly.
- * ========================================================================= */
-* {
-    font-size:   18px;
-    font-weight: 600;
-    min-height:  0;
-}
-
-/* The invisible container for the whole bar */
-window#waybar {
-    background: transparent; /* Must stay transparent for floating pills */
-    color:      @text_off_white;
-}
+    // CRITICAL: Keep spacing at 0. Gaps between pills are handled by CSS margins.
+    // If you change this, your merged Hardware pill will break apart.
+    "spacing":       0,
 
 
-/* =========================================================================
- * 2. STANDARD PILLS
- * Independent modules that live in their own standalone pill background.
- * 
- * CSS Shorthand Guide:
- * padding: [Top/Bottom] [Left/Right]
- * margin:  [Top] [Right] [Bottom] [Left]
- * ========================================================================= */
-
-/* Middle Pills */
-#workspaces, 
-#window,
-#mpris {
-    background-color: @base_dark;
-    border-radius:    8px;
-    padding:          8px 8px;       /* Controls the vertical thickness */
-    margin:           2px 6px 2px 0; /* 6px right margin creates pill gap */
-}
-
-/* Far Left Pill */
-#clock {
-    background-color: @base_dark;
-    border-radius:    8px;
-    padding:          8px 8px 8px 9px;
-    margin:           2px 6px 2px 5px; /* Locked to 5px from the left monitor edge */
-}
+    // =========================================================================
+    // 2. MODULE ALIGNMENT
+    // Determines which side of the screen your modules appear on.
+    // =========================================================================
+    "modules-left":   ["clock", "group/hardware", "hyprland/workspaces"], 
+    "modules-center": ["hyprland/window"],
+    "modules-right":  ["mpris", "group/system"], 
 
 
-/* =========================================================================
- * 3. MERGED PILLS (HARDWARE)
- * Modules placed right next to each other to form a single continuous pill.
- * ========================================================================= */
+    // =========================================================================
+    // 3. HYPRLAND MODULES
+    // =========================================================================
 
-/* Left Half: Memory */
-#memory {
-    background-color: @base_dark;
-    border-radius:    8px 0 0 8px;   /* Curves ONLY the left corners */
-    padding:          8px 0 8px 8px; /* 0 right padding merges with CPU */
-    margin:           2px 0;         /* 0 right margin so it touches CPU */
-}
+    // Displays the name of the currently focused application
+    "hyprland/window": {
+        "format":  "{class}",
+        "rewrite": { 
+            // If the workspace is completely empty (^$), display the Arch logo instead
+            "^$": "<span color = '#1793d1'></span> " 
+        }
+    },
 
-/* Right Half: CPU */
-#cpu {
-    background-color: @base_dark;
-    border-radius:    0 8px 8px 0;   /* Curves ONLY the right corners */
-    padding:          8px 8px 8px 0; /* 0 left padding merges with Memory */
-    margin:           2px 6px 2px 0; /* Standard 6px gap after the whole pill */
-}
-
-
-/* =========================================================================
- * 4. MERGED PILLS (SYSTEM STATUS)
- * Battery | Notification | Caffeine — single continuous pill on the far right.
- * ========================================================================= */
-
-/* Left: Battery */
-#battery {
-    background-color: @base_dark;
-    border-radius:    8px 0 0 8px;   /* Curves ONLY the left corners */
-    padding:          8px 2px 8px 8px; /* 2px right padding for internal breathing room */
-    margin:           2px 0;         /* 0 right margin so it touches Notification */
-}
-
-/* Middle: Notification */
-#custom-notification {
-    background-color: @base_dark;
-    border-radius:    0;             /* No curves — seamlessly merged */
-    padding:          8px 2px;       /* 2px horizontal padding for internal breathing room */
-    margin:           2px 0;
-}
-
-/* Right: Caffeine */
-#custom-caffeine {
-    background-color: @base_dark;
-    border-radius:    0 8px 8px 0;   /* Curves ONLY the right corners */
-    padding:          8px 8px 8px 2px; /* 2px left padding for internal breathing room */
-    margin:           2px 5px 2px 0; /* Locked to 5px from the right monitor edge */
-}
-
-/* Caffeine ON state (hypridle killed / sleep prevented) — warm amber icon */
-#custom-caffeine.caffeine-on {
-    color: #ffaa00;
-}
-
-/* Caffeine OFF state (hypridle running / sleep allowed) — inherits default @text_off_white */
+    // Displays your active and open workspaces
+    "hyprland/workspaces": {
+        "disable-scroll": true,       // Prevents accidental workspace switching via scroll
+        "on-click":       "activate", // Clicking a number switches directly to that workspace
+        "format":         "{name}"
+    },
 
 
-/* =========================================================================
- * 5. INTERACTIVE ELEMENTS (WORKSPACES)
- * Controls how the workspace buttons react to clicks and mouse hovers.
- * ========================================================================= */
+    // =========================================================================
+    // 4. SYSTEM INFO
+    // =========================================================================
 
-/* Default state of a workspace number/icon */
-#workspaces button {
-    transition: all 0.3s ease;  /* Smooth 0.3s fade effect for hover changes */
-    color:      @text_off_white;
-    padding:    0 6px;          /* Internal spacing between the workspace icons */
-    margin:     0 2px;
-}
+    "clock": {
+        // Formats as: [Day, Month Date  Hour:Minute] (e.g., Thu, Apr 16  14:43)
+        "format":         "{:%a,%b %d   %H:%M}",
+        // Hovering over the clock displays a full calendar popup
+        "tooltip-format": "<tt>{calendar}</tt>"
+    },
 
-/* The currently active/focused workspace */
-#workspaces button.active {
-    color:         @arch_linux; /* Pulls the custom blue/accent from colors.css */
-    border-radius: 8px;
-}
+    // The wrapper that glues your Memory and CPU modules together
+    "group/hardware": {
+        "orientation": "horizontal",
+        "spacing":     0,             // Forces RAM and CPU text to sit next to each other
+        "modules": [
+            "memory",
+            "cpu"
+        ]
+    },
 
-/* When the mouse hovers over an inactive workspace */
-#workspaces button:hover {
-    background:    transparent; /* Adds a very subtle transparent white highlight */
-    border-radius: 8px;
-}
+    // Format: 3.1GB
+    "memory": { 
+        "format": "{used:0.1f}GB" 
+    }, 
+
+    // Format: 15% (With two leading spaces to separate it visually from the RAM)
+    "cpu": { 
+        "format": "  {usage}%" 
+    },   
 
 
-/* =========================================================================
- * 6. SYSTEM TOOLTIPS
- * Popups that appear when hovering over the clock, hardware, or icons.
- * ========================================================================= */
-tooltip {
-    background:    @base_dark;
-    border-radius: 8px;
-    font-size:     16px; /* Scaled down slightly to prevent screen clutter */
+    // =========================================================================
+    // 5. MEDIA, BATTERY, NOTIFICATIONS & CAFFEINE
+    // =========================================================================
+
+    // Media Player Control (MPRIS)
+    "mpris": {
+        "format":         "{status_icon}<i>{title}</i>",
+        "format-paused":  "{status_icon}    {title}",          // Italicizes title when paused
+        "max-length":     50,                                  // Truncates super long song titles
+        "status-icons": {
+            // Uses Pango markup to colorize the play/pause buttons
+            "playing": "<span color = '#ff3870'>‎   </span>", // Red pause icon
+            "paused":  "<span color = '#00ff41'>‎ </span>",   // Green play icon
+            "stopped": " "
+        }, 
+        "on-click":       "playerctl play-pause",              // Clicking the module toggles 
+        "on-scroll-up":   "playerctl previous",                // Scroll up to previous
+        "on-scroll-down": "playerctl next"                     // Scroll down to next
+    },
+
+    // Merged pill: Battery | Notification | Caffeine
+    "group/system": {
+        "orientation": "horizontal",
+        "spacing":     0,             // Forces modules to sit next to each other
+        "modules": [
+            "battery",
+            "custom/caffeine"
+        ]
+    },
+
+    // Battery
+    "battery": {
+    "states": {
+        "critical": 25,
+        "warning":  50,
+        "good":     75,
+        "full":     100
+    },
+    "format":          "{capacity}%",
+    },
+
+    // Caffeine Toggle — uses your existing script without modification
+    "custom/caffeine": {
+    "tooltip":      true,
+    "format":       "{icon}",
+    "return-type":  "json",
+    "interval":     2,
+    "exec":         "if pgrep -x hypridle >/dev/null; then echo '{\"alt\":\"off\",\"class\":\"caffeine-off\",\"tooltip\":\"Caffeine: Off (Auto-sleep enabled)\"}'; else echo '{\"alt\":\"on\",\"class\":\"caffeine-on\",\"tooltip\":\"Caffeine: On (Screen awake)\"}'; fi",
+    "on-click":     "~/.config/scripts/caffeine_mode.sh",
+    "format-icons": {
+        "on":  "󰅶",
+        "off": "󰒲"
+    }
+    }
 }
